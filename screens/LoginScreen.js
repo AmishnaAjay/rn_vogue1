@@ -15,8 +15,8 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { BASE_URL } from "../app/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Alert } from 'react-native';
-
+import { Alert } from "react-native";
+import { post } from "../app/config/apiConfig";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -24,23 +24,21 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   // const admin_login = 'http://localhost:3000/root/login';
 
-  const handleLogin = () => {
-    axios.post((BASE_URL + 'login'), {
-      email: email,
-      password: password
-    })
-    .then(async(response) =>  {
-      await AsyncStorage.setItem('token',response?.data?.data?.token );
-      console.log('Login Successfull', response.data)
-      navigation.navigate("Main")
-      
-    })
-    .catch(error => {
-      console.error('Login failed', error.response);
-      Alert.alert('Login Failed', 'Please check your credentials and try again.');
-    });
-    
+  const handleLogin = async () => {
+    post("/login", { password: password, email: email })
+      .then(async (response) => {
+        if (response.data?.success) {
+          await AsyncStorage.setItem("token", response?.data?.token);
+          console.log("Login Successfull", response.data);
+          navigation.navigate("Main");
+        }
+      })
+      .catch((error) => {
+        console.log(error); // Log any errors
+      });
   };
+
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#fff", alignItems: "center" }}
@@ -48,7 +46,7 @@ const LoginScreen = () => {
       <View>
         <Image
           style={{ width: 150, height: 100 }}
-          source={require('../assets/Vogue.png')}
+          source={require("../assets/Vogue.png")}
         />
       </View>
 
@@ -151,7 +149,7 @@ const LoginScreen = () => {
         <View style={{ marginTop: 80 }} />
 
         <Pressable
-        onPress={handleLogin}
+          onPress={handleLogin}
           style={{
             width: 200,
             backgroundColor: "#d6807a",
@@ -160,8 +158,6 @@ const LoginScreen = () => {
             marginRight: "auto",
             padding: 15,
           }}
-
-          
         >
           <Text
             style={{
@@ -176,7 +172,7 @@ const LoginScreen = () => {
         </Pressable>
 
         <Pressable
-        onPress={() => navigation.navigate("Otp")}
+          onPress={() => navigation.navigate("Otp")}
           style={{
             marginTop: 10,
           }}
