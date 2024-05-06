@@ -77,6 +77,7 @@ console.log(err);
             style={{
               flexDirection: "row",
               alignItems: "center",
+              paddingHorizontal:10,
               marginHorizontal: 7,
               gap: 10,
               backgroundColor: "white",
@@ -162,12 +163,12 @@ console.log(err);
           data={SliderImages}
           renderItem={({ item }) => {
             return (
-              <View>
+              // <View>
                 <Image
-                  style={{ width: 400, height: 200, marginTop: 10 }}
+                  style={{ width: WIN_WIDTH, height: 200, marginTop: 10 }}
                   source={{ uri: item?.image }}
                 />
-              </View>
+              // </View> 
             );
           }}
         />
