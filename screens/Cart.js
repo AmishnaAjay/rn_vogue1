@@ -8,16 +8,33 @@ import {
   KeyboardAvoidingView,
   FlatList,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { AddCartDetails } from "../assets/data/data";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { get } from "../app/config/apiConfig";
 
 const Cart = () => {
   const navigation = useNavigation();
+  const [cartItems, setCartItems] = useState([]);
+  const [totalAmount, setTotalAmount] = useState();
+  const getAllCartItems = async () => {
+    const token = await AsyncStorage.getItem("token");
+    get(`/cart?token=${token}`).then((res) => {
+     
+      setCartItems(res?.data?.products);
+      setTotalAmount(res?.data?.totalAmount);
+    });
+  };
+
+  useEffect(() => {
+    getAllCartItems();
+  }, []);
+
   return (
     <SafeAreaView
       style={{
@@ -28,11 +45,11 @@ const Cart = () => {
     >
       <View style={{ flex: 1, paddingTop: 20 }}>
         <FlatList
-          data={AddCartDetails}
+          data={cartItems}
           renderItem={({ item }) => {
             return (
               <View
-                key={item?.id}
+                key={item?.product?._id}
                 style={{
                   flexDirection: "row",
                   padding: 15,
@@ -45,7 +62,10 @@ const Cart = () => {
                 <View>
                   <Image
                     style={{ resizeMode: "contain", width: 100, height: 100 }}
-                    source={{ uri: item?.image }}
+                    source={{
+                      uri:
+                        item?.product?.image ?? item?.product?.images[0]?.url,
+                    }}
                   />
                 </View>
                 <View style={{ flexDirection: "column" }}>
@@ -58,13 +78,13 @@ const Cart = () => {
                           color: "black",
                         }}
                       >
-                        {item?.title}
+                        {item?.product?.title}
                       </Text>
                       <Text
                         style={{ fontSize: 15, marginTop: 5, color: "black" }}
                       >
                         Qauntity:
-                        {item?.qty}
+                        {item?.quantity}
                       </Text>
                     </View>
                     <View>
@@ -90,7 +110,7 @@ const Cart = () => {
                           color: "black",
                         }}
                       >
-                        {item?.price}
+                        {item?.product?.price}
                       </Text>
                     </View>
                     <View style={{ flexDirection: "row", gap: 5 }}>
@@ -108,7 +128,7 @@ const Cart = () => {
                           color: "#d6807a",
                         }}
                       >
-                        1
+                      { item?.quantity}
                       </Text>
                       <Pressable>
                         <AntDesign
@@ -141,12 +161,12 @@ const Cart = () => {
             Total Price:
           </Text>
           <Text style={{ color: "#d6807a", fontSize: 25, fontWeight: "bold" }}>
-            £23.55
+            £{totalAmount}
           </Text>
         </View>
       </View>
       <Pressable
-        onPress={() => navigation.navigate("")}
+        onPress={() => {}}
         style={{
           width: 200,
           backgroundColor: "#d6807a",

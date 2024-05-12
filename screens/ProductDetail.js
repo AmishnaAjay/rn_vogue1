@@ -6,19 +6,54 @@ import {
   Text,
   SafeAreaView,
   Pressable,
-  Dimensions
+  Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
 import { SizeDetails } from "../assets/data/data";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { post } from "../app/config/apiConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AppHeader from "../components/AppHeader";
 
 const ProductDetail = ({ route }) => {
   const navigation = useNavigation();
   const { data } = route?.params ?? {};
   const [size, setSize] = useState("");
   const [qty, setQty] = useState(1);
-  const WIN_WIDTH = Dimensions.get('window').width
+  const WIN_WIDTH = Dimensions.get("window").width;
+  const [isAddToCart, setIsAddToCart] = useState(false);
+  const [wishlist, setWishlist] = useState(false);
+
+  const addToWishlist = async () => {
+    const token = await AsyncStorage.getItem("token");
+    post(`/wishlist?token=${token}`, { productId: data?._id })
+      .then((response) => {
+        console.log(response);
+        if (response.data?.success) {
+          setWishlist(true);
+          alert(response.data?.message);
+        }
+      })
+      .catch((error) => {});
+  };
+
+  const addToCart = async () => {
+    const token = await AsyncStorage.getItem("token");
+    post(`/add-to-cart?token=${token}`, {
+      productId: data?._id,
+      quantity: qty,
+      size: size,
+    })
+      .then((response) => {
+        if (response.data?.success) {
+          setIsAddToCart(true);
+          alert(response.data?.message);
+        }
+      })
+      .catch((error) => {});
+  };
 
   // console.log("Data=>",data);
   return (
@@ -29,30 +64,17 @@ const ProductDetail = ({ route }) => {
         backgroundColor: "white",
       }}
     >
+      <AppHeader />
       <ScrollView
         style={{ flex: 1, backgroundColor: "white" }}
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={{
-            backgroundColor: "white",
-            padding: 10,
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <Pressable
-            onPress={() => navigation.navigate("Main")}
-          >
-            <Ionicons name="arrow-back" size={24} color="#d6807a" />
-          </Pressable>
-        </View>
         <View style={{ flexDirection: "column" }}>
           <View
             style={{
               backgroundColor: "white",
-              shadowColor: "#000000",
-              shadowOpacity: 0.8,
+              // shadowColor: "#000000",
+              shadowOpacity: 0.3,
               shadowRadius: 2,
               shadowOffset: {
                 height: 1,
@@ -63,7 +85,7 @@ const ProductDetail = ({ route }) => {
           >
             <Image
               style={{ width: 300, height: 300, backgroundColor: "white" }}
-              source={{ uri: data?.image }}
+              source={{ uri: data?.image ?? data?.images[0]?.url }}
             />
           </View>
           <View style={{ marginTop: 20 }}>
@@ -77,8 +99,12 @@ const ProductDetail = ({ route }) => {
                 padding: 20,
               }}
             >
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>£ {data?.price} </Text>
-              <Text>{("⭐⭐⭐⭐⭐").slice(0, data?.rating)} {data?.rating}/5</Text>
+              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                £ {data?.price}{" "}
+              </Text>
+              <Text>
+                {"⭐⭐⭐⭐⭐".slice(0, data?.rating)} {data?.rating}/5
+              </Text>
             </View>
             <View
               style={{
@@ -104,26 +130,37 @@ const ProductDetail = ({ route }) => {
                   <Pressable
                     onPress={() => {
                       if (qty != 1) {
-                        setQty(qty - 1)
+                        setQty(qty - 1);
                       }
                     }}
-                    style={[{
+                    style={[
+                      {
+                        borderWidth: 1,
+                        paddingRight: 10,
+                        paddingLeft: 10,
+                        borderColor: "gray",
+                        backgroundColor: "#e3e8e5",
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        { fontSize: 25, textAlign: "center" },
+                        qty == 1 && { opacity: 0.6 },
+                      ]}
+                    >
+                      -
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={{
                       borderWidth: 1,
                       paddingRight: 10,
                       paddingLeft: 10,
                       borderColor: "gray",
                       backgroundColor: "#e3e8e5",
-                    }]}
+                    }}
                   >
-                    <Text style={[{ fontSize: 25, textAlign: "center" }, qty == 1 && { opacity: .6 }]}>-</Text>
-                  </Pressable>
-                  <Pressable style={{
-                    borderWidth: 1,
-                    paddingRight: 10,
-                    paddingLeft: 10,
-                    borderColor: "gray",
-                    backgroundColor: "#e3e8e5",
-                  }} >
                     <Text style={{ fontSize: 20, marginTop: 5 }}>{qty}</Text>
                   </Pressable>
                   <Pressable
@@ -134,7 +171,8 @@ const ProductDetail = ({ route }) => {
                       paddingLeft: 10,
                       borderColor: "gray",
                       backgroundColor: "#e3e8e5",
-                    }}>
+                    }}
+                  >
                     <Text style={{ fontSize: 25, textAlign: "center" }}>+</Text>
                   </Pressable>
                 </View>
@@ -148,33 +186,56 @@ const ProductDetail = ({ route }) => {
                 <Pressable
                   onPress={() => {
                     if (item != size) {
-                      setSize(item)
+                      setSize(item);
                     } else {
-                      setSize("")
+                      setSize("");
                     }
                   }}
                   key={i}
-                  style={[{
-                    borderWidth: 1,
-                    width: 100,
-                    height: 30,
-                    marginLeft: 20,
-                    marginTop: 18,
-                    borderRadius: 10,
-                    justifyContent: "center",
-                  }, item == size && { backgroundColor: 'black' }]}
+                  style={[
+                    {
+                      borderWidth: 1,
+                      width: 100,
+                      height: 30,
+                      marginLeft: 20,
+                      marginTop: 18,
+                      borderRadius: 10,
+                      justifyContent: "center",
+                    },
+                    item == size && { backgroundColor: "black" },
+                  ]}
                 >
-                  <Text style={[{ textAlign: "center", color: 'black', fontWeight: 'bold' }, item == size && { color: 'white' }]}>{item}</Text>
+                  <Text
+                    style={[
+                      {
+                        textAlign: "center",
+                        color: "black",
+                        fontWeight: "bold",
+                      },
+                      item == size && { color: "white" },
+                    ]}
+                  >
+                    {item}
+                  </Text>
                 </Pressable>
               );
             })}
           </Pressable>
         </View>
 
-        {data?.availability == "Stock Out" ?
-          <View style={{ width: "100%", alignItems: 'center', paddingVertical: 20 }}>
-
-            <View style={{ height: 40, width: WIN_WIDTH - 40, backgroundColor: 'lightgrey', borderRadius: 15, justifyContent: 'center' }}>
+        {data?.availability == "Stock Out" ? (
+          <View
+            style={{ width: "100%", alignItems: "center", paddingVertical: 20 }}
+          >
+            <View
+              style={{
+                height: 40,
+                width: WIN_WIDTH - 40,
+                backgroundColor: "lightgrey",
+                borderRadius: 15,
+                justifyContent: "center",
+              }}
+            >
               <Text
                 style={{
                   textAlign: "center",
@@ -188,19 +249,51 @@ const ProductDetail = ({ route }) => {
               </Text>
             </View>
           </View>
-          : <View style={{ flexDirection: "row", paddingVertical: 20, gap: 15, justifyContent: 'center', }}>
+        ) : (
+          <View
+            style={{
+              flexDirection: "row",
+              paddingVertical: 20,
+              gap: 15,
+              justifyContent: "center",
+            }}
+          >
             <View
               style={{
-                width: WIN_WIDTH * .42,
+                width: WIN_WIDTH * 0.42,
                 height: 40,
                 justifyContent: "center",
 
                 backgroundColor: "#d6807a",
-                borderRadius: 15
+                borderRadius: 15,
               }}
             >
-              <Pressable
-                onPress={() => navigation.navigate("AddToCart")}
+              <TouchableOpacity onPress={() => addToWishlist()}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: "white",
+                    fontSize: 15,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Add to Wishlist
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={{
+                width: WIN_WIDTH * 0.42,
+                height: 40,
+                justifyContent: "center",
+                backgroundColor: "#d6807a",
+                borderRadius: 15,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  isAddToCart ? navigation.navigate("AddToCart") : addToCart();
+                }}
               >
                 <Text
                   style={{
@@ -210,38 +303,13 @@ const ProductDetail = ({ route }) => {
                     fontWeight: "bold",
                   }}
                 >
-                  Add to Cart
+                  {isAddToCart ? "Go to Cart" : "Add to Cart"}
                 </Text>
-
-              </Pressable>
-
+              </TouchableOpacity>
             </View>
-            <View
-              style={{
-                width: WIN_WIDTH * .42,
-                height: 40,
-                justifyContent: "center",
-                backgroundColor: "#d6807a",
-                borderRadius: 15
-              }}
-            >
-              <Pressable
-                onPress={() => navigation.navigate("Buy")}
-              >
-                <Text
-                  style={{
-                    textAlign: "center",
-                    color: "white",
-                    fontSize: 15,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Buy Now
-                </Text>
-              </Pressable>
-
-            </View>
-          </View>}
+          </View>
+        )}
+        
       </ScrollView>
     </SafeAreaView>
   );

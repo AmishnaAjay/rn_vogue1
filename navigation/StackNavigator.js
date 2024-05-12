@@ -20,6 +20,7 @@ import SplashScreen from "../screens/SplashScreen";
 import AddressForm from "../screens/AddressForm";
 import ProfilePage from "../screens/ProfilePage";
 import Cart from "../screens/Cart";
+import Wishlist from "../screens/Wishlist";
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -59,6 +60,22 @@ const StackNavigator = () => {
           }}
         />
 
+<Tab.Screen
+          name="Wishlist"
+          component={Wishlist}
+          options={{
+            tabBarLabel: "Wishlist",
+            tabBarLabelStyle: { color: "#d6807a" },
+            headerShown: false,
+            tabBarIcon: ({ focused }) =>
+              focused ? (
+                <Ionicons name="heart" size={24} color="#d6807a" />
+              ) : (
+                <Ionicons name="heart-outline" size={24} color="#d6807a" />
+              ),
+          }}
+        />
+
         <Tab.Screen
           name="Cart"
           component={Cart}
@@ -80,11 +97,11 @@ const StackNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* <Stack.Screen
+        <Stack.Screen
           name="Splash"
           component={SplashScreen}
           options={{ headerShown: false }}
-        />  */}
+        /> 
         <Stack.Screen
           name="Login"
           component={LoginScreen}

@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { BASE_URL } from "../app/config";
 import axios from "axios";
+import { post } from "../app/config/apiConfig";
 
 const RegScreen = () => {
   const [firstName, setFirstName] = useState("");
@@ -30,15 +31,16 @@ const RegScreen = () => {
   
   const handleRegister = () => {
     // Send a POST request to your backend endpoint
-    axios.post((BASE_URL + 'register'), {
+   post('/register', {
       first_name: firstName,
       last_name: lastName,
       dob: dob,
       password: password,
       email: email
     })
-    .then(response => {
+    .then(async(response) => {
       // Registration successful
+      await AsyncStorage.setItem("token", response?.data?.token);
       navigation.navigate("Main")
       console.log('Registration successful:', response.data);
       setSuccess(true);
@@ -51,6 +53,8 @@ const RegScreen = () => {
       setSuccess(false);
     });
   };
+
+
    
   return (
     <SafeAreaView
