@@ -38,16 +38,37 @@ const HomeScreen = () => {
 
 
   const getHome = async () => {
-    const token = await AsyncStorage.getItem("token");
-    const res = await get(`/home?token=${token}`);
-    if (res?.data?.success) {
-      console.log(res.data);
-      setProducts(res?.data?.products);
-      setCategories(res?.data?.categories);
-      setBanners(res?.data?.banners);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+  
+      const res = await axios.get(`/home?token=${token}`);
+      console.log(res);
+  
+      if (res?.data?.success) {
+        setProducts(res?.data?.products);
+        setCategories(res?.data?.categories);
+        setBanners(res?.data?.banners);
+      } else {
+        console.error('Response does not indicate success', res);
+      }
+    } catch (err) {
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Server responded with error', err.response.status, err.response.data);
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('No response received', err.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error setting up request', err.message);
+      }
     }
   };
-
+  
   useEffect(() => {
     getHome();
   }, []);

@@ -9,8 +9,9 @@ const SplashScreen = ({ navigation }) => {
 
   const verifyUser = async () => {
     const token = await AsyncStorage.getItem('token');
+    console.log(token);
 
-    if (token != null || token != undefined || token != ""){
+    if (token != null ){
       navigation.navigate("Main");
     }else{
       navigation.navigate('Login');

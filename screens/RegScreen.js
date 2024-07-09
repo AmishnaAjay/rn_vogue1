@@ -17,6 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import { BASE_URL } from "../app/config";
 import axios from "axios";
 import { post } from "../app/config/apiConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RegScreen = () => {
   const [firstName, setFirstName] = useState("");
@@ -39,16 +40,17 @@ const RegScreen = () => {
       email: email
     })
     .then(async(response) => {
+      console.log(response?.data);
       // Registration successful
       await AsyncStorage.setItem("token", response?.data?.token);
       navigation.navigate("Main")
-      console.log('Registration successful:', response.data);
+      console.log('Registration successful:', response?.data);
       setSuccess(true);
       setError(null);
     })
     .catch(error => {
       // Registration failed
-      console.error('Registration error:', error.response.data);
+      console.error('Registration error:', error);
       setError(error.response.data.message);
       setSuccess(false);
     });

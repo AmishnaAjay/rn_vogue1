@@ -6,6 +6,7 @@ import {
   Pressable,
   Image,
   KeyboardAvoidingView,
+  Platform,
   FlatList,
 } from "react-native";
 import React, { useEffect, useState } from "react";

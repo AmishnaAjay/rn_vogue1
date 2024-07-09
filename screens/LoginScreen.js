@@ -22,16 +22,16 @@ const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
-  // const admin_login = 'http://localhost:3000/root/login';
 
   const handleLogin = async () => {
-    post("/login", { password: password, email: email })
+    post("/login", { password: password, email: email, role:"user" })
       .then(async (response) => {
+        console.log(response);
         if (response.data?.success) {
           await AsyncStorage.setItem("token", response?.data?.token);
           console.log("Login Successfull", response.data);
           navigation.navigate("Main");
-        }
+        }78
       })
       .catch((error) => {
         console.log(error); // Log any errors
