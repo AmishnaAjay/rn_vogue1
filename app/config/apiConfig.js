@@ -1,6 +1,11 @@
 import axios from 'axios';
 import { BASE_URL } from '../config';
 
+export const serverName = 'http://localhost:3007';
+export const imageUrl = `${serverName}/images/`;
+export const bannerUrl = `${imageUrl}banner-images/`; // Your
+export const productImageUrl = `${imageUrl}product-images/`; // Your
+
 const baseURL = "http://localhost:3007/api/v1"; // Your API base URL
 
 const instance = axios.create({

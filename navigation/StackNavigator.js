@@ -9,7 +9,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
-import ProductDetail from "../screens/ProductDetail";
+import ProductDetail from "../screens/ProductDetails";
 import Otp from "../screens/Otp";
 import Buy from "../screens/Buy";
 import AddToCart from "../screens/AddToCart";
